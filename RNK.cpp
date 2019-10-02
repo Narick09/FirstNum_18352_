@@ -57,20 +57,12 @@ RNK::reference & RNK::reference::operator=(Nucleotide nucl) {
 			rna->size_ = ind;
 		}
 	}
-//	size_t clearMusk = rna->getMusk(ind, T);
-//	clearMusk = ~clearMusk;
-//	std::cout << "clearMusk: " << clearMusk <<"\n";
-//	size_t musk = rna->getMusk(ind, nucl);
-//	size_t tmp = ind / (4 * sizeof(size_t));
-//	rna->Nuc_[tmp] = rna->Nuc_[tmp] & clearMusk;
-//	rna->Nuc_[tmp] = rna->Nuc_[tmp] | musk;
 	return *this;
 }
 
 RNK::reference::operator Nucleotide() {
 	if (ind > rna->size_)
 		return A;
-//	size_t Musk = rna->getMusk(i, T);
 	size_t countNucInType = (4 * sizeof(size_t));
 	size_t d = ind % countNucInType;
 	size_t c = ind / countNucInType;
@@ -78,26 +70,21 @@ RNK::reference::operator Nucleotide() {
 	size_t tmp = rna->Nuc_[c]; 
 	tmp = tmp << 2 * (countNucInType - 1 - d);
 	tmp = tmp >> 2 * (countNucInType - 1);
-	//std::cout << "tmp " << tmp << "\n";
-
+	
 	Nucleotide n = A;
 	switch (tmp)
 	{
 	case A:
 		n = A;
-//		std::cout << "A ";
 		break;
 	case C:
 		n = C;
-//		std::cout << "C ";
 		break;
 	case G:
 		n = G;
-//		std::cout << "G ";
 		break;
 	case T:
 		n = T;
-//		std::cout << "T ";
 		break;
 	default:
 		break;
@@ -133,7 +120,6 @@ RNK::RNK(size_t s, Nucleotide n) :size_(s)
 		musk = musk << 2;
 		musk = musk | n;
 	}
-	//	std::cout << "musk in constructor: " << musk << std::endl;
 	for (size_t i = 0; i < physSize; i++) {
 		Nuc_[i] = 0;
 		Nuc_[i] = musk;
@@ -159,49 +145,6 @@ RNK::RNK(const RNK& other) {
 		Nuc_[i] = other.Nuc_[i];
 	}
 }
-
-/*
-Nucleotide RNK::TmpGeterNuc(size_t i) const {
-	if (i > this->size_)
-		return A;
-
-	size_t Musk = this->getMusk(i, T);
-	//size_t tmp = Nuc_[i] & Musk;
-	//std::cout << Musk << "\n";
-	//	tmp = tmp >> (2 * (i % countNucInType));
-	size_t tmp = 0;
-	size_t countNucInType = (4 * sizeof(size_t));
-	size_t d = i % countNucInType;
-	size_t c = i / countNucInType;
-	tmp = Nuc_[c];
-	tmp = tmp << 2 * (countNucInType - 1 - d);
-	tmp = tmp >> 2 * (countNucInType - 1);
-	//std::cout << "tmp " << tmp << "\n";
-	Nucleotide n = A;
-	switch (tmp)
-	{
-	case A:
-		n = A;
-		std::cout << "A ";
-		break;
-	case C:
-		n = C;
-		std::cout << "C ";
-		break;
-	case G:
-		n = G;
-		std::cout << "G ";
-		break;
-	case T:
-		n = T;
-		std::cout << "T ";
-		break;
-	default:
-		break;
-	}
-	return n;
-}
-*/
 
 RNK RNK::operator !(){
 	for (size_t i = 0; i < physSize; i++)
@@ -251,31 +194,6 @@ RNK & RNK::operator=(const RNK & rna) {
 	return *this;
 }
 
-/*
-//operator []
-unsigned int RNK::operator [] (size_t i) const {			//должна ли перегрузка этого оператора уметь изменять определенный элемент? - yes suka
-	size_t d = i % countNucInType;
-	size_t c = i / countNucInType;
-	unsigned int symb = 0;
-	symb = Nuc_[c];
-	symb = symb << 2 * (countNucInType - 1 - d);
-	symb = symb >> 2 * (countNucInType - 1);
-	if (symb == C) {				//можно ли по-другому работать с enum?
-		symb = 'C';
-	}
-	if (symb == A) {
-		symb = 'A';
-	}
-	if (symb == G) {
-		symb = 'G';
-	}
-	if (symb == T) {
-		symb = 'T';
-	}
-	return symb;
-}
-*/
-
 //correct vrode
 void RNK::trim(size_t lastIndex) {
 	if (lastIndex < this->size_) {		//< / <= ?
@@ -300,64 +218,3 @@ bool RNK::operator==(const RNK& rna) const {
 	bool tmp = this->isComplementary(!tmpRnk);
 	return tmp;
 }
-
-/*
-bool RNK::operator!=(const RNK& rnk) const {
-	if (*this == rnk)
-		return false;
-	else
-		return true;
-}
-
-RNK RNK::operator+(const RNK& other) {
-	size_t newSize = size_ + other.size_;
-	size_ = newSize;
-	if (newSize % countNucInType != 0)
-		newSize = ((newSize / countNucInType) + 1);
-	else
-		newSize = newSize / countNucInType;
-
-	unsigned int* newNuc = new unsigned int[newSize];
-	for (size_t i = 0; i < size_ / countNucInType; i++) {
-		newNuc[i] = Nuc_[i];
-	}
-	//а дальше - надо как-то сдвинуть во всех нуклеотидах 2го рнк на столько, на сколько нужно сдвинуть именно тут.
-	//и сдвинуть так, чтобы оставшееся со следующего инта переписалось в нынешний, сдвинутый. 
-	//крч передвинуть весь массив и перезаписать его.............
-	//кажись, проще пройти весь массив побитно. Фе...
-//	for (int i = ...; i < ...; i++) {
-		//tyt byit myaso
-		//cycle for other rnk
-		//внутри цикла проходим, сдвигаем каждый элемент <<, смотрим в следующий. От него берем первые столько бит, на сколько сдвигаем.
-//	}
-	return *this;
-}
-
-//cardinality: - krivo poka chto
-/*
-size_t RNK::cardinality(Nucleotide value) {
-	size_t tmpSize = 0;
-	size_t counter = 0;
-	if (size_ % countNucInType == 0)
-		tmpSize = size_ / countNucInType;
-	else
-		tmpSize = size_ / countNucInType + 1;
-	size_t j = 0;
-	for (size_t i = 0; i * j < size_; i++) {
-		j = 0;
-		while ((j < countNucInType) && (((i - 1) * countNucInType + j) <= size_))
-		{
-			size_t musk = getMusk(j, value);
-			size_t muskInPos = getMusk(j, T);
-//			std::cout << "0";
-			if ((musk == ((Nuc_[i] | musk) & muskInPos)) && (musk == (Nuc_[i] & musk))) {
-				counter++;
-			//	std::cout << "0";
-			}
-			j++;
-		}
-	}
-	return counter;
-}
-*/
-//in class RNK i need to realize once class with pointer to array
