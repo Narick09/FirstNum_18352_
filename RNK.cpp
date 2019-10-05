@@ -33,7 +33,7 @@ RNK::reference & RNK::reference::operator=(Nucleotide nucl) {
 			size_t *tmpArray = new size_t[newPhysSize];
 			for (size_t i = 0; i < rna->physSize; i++) {
 				tmpArray[i] = rna->Nuc_[i];
-				std::cout << "adfsjgajdldgasfhklgdfldksfjgsk\n";
+			//	std::cout << "adfsjgajdldgasfhklgdfldksfjgsk\n";
 			}
 			//		std::cout << "smt";
 			size_t tmpShift = 8 * (sizeof(size_t) - (rna->physSize % sizeof(size_t))) - 2;
@@ -219,11 +219,22 @@ void RNK::trim(size_t lastIndex) {
 	}
 }
 
-//may be faled in efficiency factor(KPD)
+//need to chack index
 bool RNK::operator==(const RNK& rna) const {
-	RNK tmpRnk(rna);
-	bool tmp = this->isComplementary(!tmpRnk);
-	return tmp;
+//	RNK tmpRnk(rna);
+//	bool tmp = true;
+	if (this->size_ != rna.size_) return false;
+	for (size_t i = 0; i < rna.physSize - 1; i++) {
+		if (this->Nuc_[i] != rna.Nuc_[i]) {
+			return false;
+		}
+	}
+	for (size_t i = rna.size_ - 1 - ((rna.physSize - 1) * sizeof(size_t)); i < rna.size_; i++) {
+		if (this->operator[](i) != rna[i]) {
+			return false;
+		}
+	}
+	return true;
 }
 
 bool RNK::operator!=(const RNK& rnk) const {
@@ -234,12 +245,54 @@ bool RNK::operator!=(const RNK& rnk) const {
 }
 
 //need to check all things in this func
+//+ so long
 RNK RNK::split(size_t ind) {
 	RNK rnkTmp;
 	RNK rnkTmpThis(*this);
-	for (size_t i = 0; i < this->size_ - ind; i++) {
+	for (size_t i = 0; i < this->size_ - ind; i++) {			//долго
 		rnkTmp[i] = (Nucleotide)rnkTmpThis[i + ind];
 	}
 	this->trim(ind);
 	return rnkTmp;
+}
+//without checking:
+size_t RNK::cardinality(Nucleotide value) const {
+	size_t returnNum = 0;
+	for (size_t i = 0; i < this->size_; i++) {
+		if (this->operator[](i) == value) {
+			returnNum++;
+		}
+	}
+	return returnNum;
+}
+
+std::unordered_map < Nucleotide, int, std::hash<int> > RNK::cardinality() const {
+	std::unordered_map < Nucleotide, int, std::hash<int> > returnNums;
+	//work with this
+	return returnNums;
+}
+
+std::ostream& operator << (std::ostream & out, const RNK& other) {
+	for (size_t i = 0; i < other.length(); i++) {
+		switch (other[i])
+		{
+		case A:
+			out << "A ";
+			break;
+		case C:
+			out << "C ";
+			break;
+		case G:
+			out << "G ";
+			break;
+		case T:
+			out << "T ";
+			break;
+		default:
+			break;
+		}
+//		out << other[i] << " ";
+	}
+	out << "\n";
+	return out;
 }
