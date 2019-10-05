@@ -50,7 +50,7 @@ public:
 
 	reference operator[](size_t ind);
 	Nucleotide operator[](size_t ind) const;
-
+	friend std::ostream& operator << (std::ostream & out, const RNK& other);
 	~RNK();
 };
 
