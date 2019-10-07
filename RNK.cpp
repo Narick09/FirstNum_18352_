@@ -201,6 +201,36 @@ RNK & RNK::operator=(const RNK & rna) {
 	return *this;
 }
 
+//its so hard
+//hard indexes again
+RNK RNK::operator+(const RNK& rnk) const{						//is not finished else
+	RNK returnRnk(this->size_ + rnk.size_, A);
+//	std::cout << "\nthisSize: " << this->size_;
+//	std::cout << "\notherSize: " << rnk.size_;
+//	std::cout << "\nreturnedSize: " << returnRnk.size_;
+//	returnRnk.physSize = this->physSize + rnk.physSize;
+	returnRnk.Nuc_ = new size_t[returnRnk.physSize];
+
+	//from 1st RNK
+	for (size_t i = 0; i < this->physSize; i++) {
+		returnRnk.Nuc_[i] = this->Nuc_[i];
+	}
+
+	//from 2nd RNK
+	size_t countNucInType = 4 * sizeof(size_t);
+	size_t shiftLeft = 2 * (countNucInType - ((this->size_)% countNucInType));//in bits
+	size_t shiftRight = 2 * ((this->size_) % countNucInType);//in bits
+
+	returnRnk.Nuc_[this->physSize - 1] = returnRnk.Nuc_[this->physSize - 1] << shiftLeft;//занулить ненужные нуклеотиды - not correct(
+	returnRnk.Nuc_[this->physSize - 1] = returnRnk.Nuc_[this->physSize - 1] >> shiftLeft;//left-right
+	//это нужно, чтобы записать без сдвига:
+	for (size_t i = this->physSize; i < returnRnk.physSize; i++) {							//- not cottect(
+		returnRnk.Nuc_[i] = rnk.Nuc_[i - this->physSize] >> (shiftRight - 4);				//kostil
+		size_t tmp = rnk.Nuc_[i - this->physSize] << (shiftLeft + 4);					//kostil
+		returnRnk.Nuc_[i - 1] = returnRnk.Nuc_[i - 1] | tmp;
+	}
+	return returnRnk;
+}
 
 //not correct in ind==0
 void RNK::trim(size_t lastIndex) {
