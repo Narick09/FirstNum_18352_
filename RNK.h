@@ -33,7 +33,7 @@ public:
 	RNK operator !();
 	bool operator==(const RNK& rnk) const;
 	bool operator!=(const RNK& rnk) const;
-	RNK operator+(const RNK& rnk);
+	RNK operator+(const RNK& rnk) const;
 
 	bool isComplementary(const RNK& rnk) const;
 
@@ -54,6 +54,4 @@ public:
 	~RNK();
 };
 
-//over <<
-//change ==
 //rha[1000001]; - check time
