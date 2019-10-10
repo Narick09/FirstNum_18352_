@@ -2,7 +2,7 @@
 
 RNK::reference::reference(RNK * const ptr, size_t ind) :rna(ptr), ind(ind) {}
 
-//correct vrode. It was veryvery hard чтобы не запутаться в индексах. Ух. Нужны еще тесты...
+//not correct
 RNK::reference & RNK::reference::operator=(Nucleotide nucl) {
 	if (ind + 1 <= rna->size_) {
 		//error 
@@ -56,7 +56,7 @@ RNK::reference & RNK::reference::operator=(Nucleotide nucl) {
 	}
 	return *this;
 }
-
+//not correct(?)
 RNK::reference::operator Nucleotide() const {
 	if (ind > rna->size_)
 		return A;
@@ -147,7 +147,7 @@ size_t RNK::length() const {
 RNK::RNK(const RNK& other) {
 	this->size_ = other.size_;
 	this->physSize = other.physSize;
-	Nuc_ = new unsigned int[physSize];
+	Nuc_ = new size_t[physSize];
 	for (size_t i = 0; i < physSize; i++) {
 		Nuc_[i] = other.Nuc_[i];
 	}
@@ -201,78 +201,48 @@ RNK & RNK::operator=(const RNK & rna) {
 	return *this;
 }
 
-//its so hard
+//it was so hard
 //hard indexes again
-RNK RNK::operator+(const RNK& rnk) const{						//is not finished else
-	RNK returnRnk(this->size_ + rnk.size_, A);
-//	std::cout << "\nthisSize: " << this->size_;
-//	std::cout << "\notherSize: " << rnk.size_;
-//	std::cout << "\nreturnedSize: " << returnRnk.size_;
-//	returnRnk.physSize = this->physSize + rnk.physSize;
-	returnRnk.Nuc_ = new size_t[returnRnk.physSize];
+RNK RNK::operator+(const RNK& rnk) const{
+	if (this->size_ == 0) {
+		RNK returnRnk(rnk);
+		return returnRnk;
+	}
+	if (rnk.size_ == 0) {
+		RNK returnRnk(*this);
+		return returnRnk;
+	}
 
+	RNK returnRnk(this->size_ + rnk.size_, A);
+	returnRnk.Nuc_ = new size_t[returnRnk.physSize];
 	//from 1st RNK
 	for (size_t i = 0; i < this->physSize; i++) {
 		returnRnk.Nuc_[i] = this->Nuc_[i];
 	}
-
 	//from 2nd RNK
 	size_t countNucInType = 4 * sizeof(size_t);
-	size_t shiftLeft = 2 * (countNucInType - ((this->size_)% countNucInType));//in bits
-	size_t shiftRight = 2 * ((this->size_) % countNucInType);//in bits
-
-	returnRnk.Nuc_[this->physSize - 1] = returnRnk.Nuc_[this->physSize - 1] << shiftLeft;//занулить ненужные нуклеотиды - not correct(
-	returnRnk.Nuc_[this->physSize - 1] = returnRnk.Nuc_[this->physSize - 1] >> shiftLeft;//left-right
-	//это нужно, чтобы записать без сдвига:
-	for (size_t i = this->physSize; i < returnRnk.physSize; i++) {							//- not cottect(
-		returnRnk.Nuc_[i] = rnk.Nuc_[i - this->physSize] >> (shiftRight - 4);				//kostil
-		size_t tmp = rnk.Nuc_[i - this->physSize] << (shiftLeft + 4);					//kostil
+	size_t shiftLeft = 2 * ((this->size_) % countNucInType);//in bits
+	size_t shiftRight = 2 * countNucInType - shiftLeft;//in bits
+	returnRnk.Nuc_[this->physSize - 1] = returnRnk.Nuc_[this->physSize - 1] << shiftRight;//занулить ненужные нуклеотиды
+	returnRnk.Nuc_[this->physSize - 1] = returnRnk.Nuc_[this->physSize - 1] >> shiftRight;//left-right
+	//это нужно, чтобы записать со сдвигом:
+	for (size_t i = this->physSize; i < returnRnk.physSize; i++) {
+		returnRnk.Nuc_[i] = rnk.Nuc_[i - this->physSize] >> shiftRight;
+		size_t tmp = rnk.Nuc_[i - this->physSize] << shiftLeft;
 		returnRnk.Nuc_[i - 1] = returnRnk.Nuc_[i - 1] | tmp;
 	}
 	return returnRnk;
 }
-/*2nd var:
-RNK RNK::operator+(const RNK& rnk) const{						//is not finished else
-	RNK returnRnk(this->size_ + rnk.size_, A);
-//	std::cout << "\nthisSize: " << this->size_;
-//	std::cout << "\notherSize: " << rnk.size_;
-//	std::cout << "\nreturnedSize: " << returnRnk.size_;
-//	returnRnk.physSize = this->physSize + rnk.physSize;
-	returnRnk.Nuc_ = new size_t[returnRnk.physSize];
-
-	//from 1st RNK
-	for (size_t i = 0; i < this->physSize; i++) {
-		returnRnk.Nuc_[i] = this->Nuc_[i];
-	}
-
-	//from 2nd RNK
-	size_t countNucInType = 4 * sizeof(size_t);
-	size_t shiftLeft = 2 * (countNucInType - ((this->size_) % countNucInType));//in bits
-	size_t shiftRight = 2 * ((this->size_) % countNucInType - 2);//in bits
-
-	returnRnk.Nuc_[this->physSize - 1] = returnRnk.Nuc_[this->physSize - 1] << shiftLeft;//занулить ненужные нуклеотиды - not correct(
-	returnRnk.Nuc_[this->physSize - 1] = returnRnk.Nuc_[this->physSize - 1] >> shiftLeft;//left-right
-	//это нужно, чтобы записать без сдвига:
-	for (size_t i = this->physSize; i < returnRnk.physSize; i++) {							//- not cottect(
-		returnRnk.Nuc_[i] = rnk.Nuc_[i - this->physSize] >> shiftRight;//kostil
-//		returnRnk.Nuc_[i] = returnRnk.Nuc_[i]  << shiftRight;//kostil
-
-		size_t tmp = rnk.Nuc_[i - this->physSize] << shiftLeft;						//kostil
-		returnRnk.Nuc_[i - 1] = returnRnk.Nuc_[i - 1] | tmp;
-	}
-	return returnRnk;
-}
-*/
 
 //not correct in ind==0
 void RNK::trim(size_t lastIndex) {
 	if (lastIndex < this->size_) {		//< / <= ?
 //		size_t size = 0;
-		this->size_ = lastIndex;
-		this->physSize = lastIndex / (4 * sizeof(size_t));
-		if (lastIndex % (4 * sizeof(size_t)) != 0)
+		this->size_ = lastIndex + 1;
+		this->physSize = (lastIndex + 1) / (4 * sizeof(size_t));
+		if ((lastIndex + 1) % (4 * sizeof(size_t)) != 0)
 			this->physSize++;
-		unsigned int * NucNew = new unsigned int[this->physSize];
+		size_t * NucNew = new size_t[this->physSize];
 		for (size_t i = 0; i < this->physSize; i++) {
 			NucNew[i] = Nuc_[i];
 		}
@@ -329,8 +299,26 @@ size_t RNK::cardinality(Nucleotide value) const {
 }
 
 std::unordered_map < Nucleotide, int, std::hash<int> > RNK::cardinality() const {
-	std::unordered_map < Nucleotide, int, std::hash<int> > returnNums;
-	//work with this
+	std::unordered_map < Nucleotide, int, std::hash<int> > returnNums;	
+	for (int i = 0; i < this->size_; i++) {
+		switch (this->operator[](i))
+		{
+		case A:
+			returnNums[A]++;
+			break;
+		case C:
+			returnNums[C]++;
+			break;
+		case G:
+			returnNums[G]++;
+			break;
+		case T:
+			returnNums[T]++;
+			break;
+		default:
+			break;
+		}
+	}
 	return returnNums;
 }
 
