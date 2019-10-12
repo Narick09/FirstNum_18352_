@@ -2,7 +2,6 @@
 
 RNK::reference::reference(RNK * const ptr, size_t ind) :rna(ptr), ind(ind) {}
 
-//not correct
 RNK::reference & RNK::reference::operator=(Nucleotide nucl) {
 	if (ind + 1 <= rna->size_) {
 		//error 
@@ -11,56 +10,55 @@ RNK::reference & RNK::reference::operator=(Nucleotide nucl) {
 	else
 	{
 		size_t newPhysSize = (ind + 1) / (4 * sizeof(size_t));
+		
 		if ((ind + 1) % (4 * sizeof(size_t)) != 0)
 			newPhysSize++;
 		//проверить, нужно ли выделять память
+		
 		if (newPhysSize == rna->physSize) {
 			//don't need to alloc
 			//but we need to change old mem, in with index > rna->size, to 0
 			// 1) << 2) >>
 
-			size_t tmpShift = 8 * (sizeof(size_t) - (rna->physSize % sizeof(size_t))) - 2;
+			size_t tmpShift = (sizeof(size_t) * 8 - ((rna->size_ * 2) % (sizeof(size_t)*8)));//in bits
 			if (rna->physSize != 0) {
 				rna->Nuc_[rna->physSize - 1] = (rna->Nuc_[rna->physSize - 1] << tmpShift) >> tmpShift;
-			}//чтобы в случае 0й размерности не вылетал/ тут мб даже и не проверять, пушо нужно
-
-			rna->Nuc_[newPhysSize - 1] = rna->Nuc_[newPhysSize - 1] | rna->getMusk(ind, nucl);
+			}//чтобы в случае 0й размерности не вылетал/ тут мб даже и не проверять
+			size_t tmpMusk = rna->getMusk(ind, nucl);
+			rna->Nuc_[newPhysSize - 1] = rna->Nuc_[newPhysSize - 1] | tmpMusk;
 			rna->size_ = ind + 1;
-		}
-		else {
+		} 
+		else 
+		{
 			//need to alloc memory																//correct vrode
 			//but we need to change old mem, in with index > rna->size, to 0 else
 			size_t *tmpArray = new size_t[newPhysSize];
 			for (size_t i = 0; i < rna->physSize; i++) {
 				tmpArray[i] = rna->Nuc_[i];
-			//	std::cout << "adfsjgajdldgasfhklgdfldksfjgsk\n";
 			}
-			//		std::cout << "smt";
-			size_t tmpShift = 8 * (sizeof(size_t) - (rna->physSize % sizeof(size_t))) - 2;
+			size_t tmpShift = (sizeof(size_t) * 8 - ((rna->size_ * 2) % (sizeof(size_t) * 8)));//in bits
 			if (rna->physSize != 0) {
 				tmpArray[rna->physSize - 1] = (tmpArray[rna->physSize - 1] << tmpShift) >> tmpShift;
 			}//чтобы в случае 0й размерности не вылетал
 
 			for (size_t i = rna->physSize; i < newPhysSize; i++)
 				tmpArray[i] = 0;
-			//stoped in this
 			//самому последнему нуклеотиду присвоить принимаемое значение - бубен с маской
 			tmpArray[newPhysSize - 1] = tmpArray[newPhysSize - 1] | rna->getMusk(ind, nucl);//просто инд, а не инд+1, пушо в маске 0я позиция -
-																							//это 1я физическая позиция
+													//это 1я физическая позиция
 			delete[] rna->Nuc_;
 			rna->Nuc_ = tmpArray;
 			rna->physSize = newPhysSize;
 			rna->size_ = ind + 1;
 		}
-
 	}
 	return *this;
 }
-//not correct(?)
+
 RNK::reference::operator Nucleotide() const {
 	if (ind > rna->size_)
 		return A;
-	//	size_t Musk = rna->getMusk(i, T);
+	
 	size_t countNucInType = (4 * sizeof(size_t));
 	size_t d = ind % countNucInType;
 	size_t c = ind / countNucInType;
@@ -68,26 +66,21 @@ RNK::reference::operator Nucleotide() const {
 	size_t tmp = rna->Nuc_[c];
 	tmp = tmp << 2 * (countNucInType - 1 - d);
 	tmp = tmp >> 2 * (countNucInType - 1);
-	//	std::cout << "tmp " << tmp << "\n";
 
 	Nucleotide n = A;
 	switch (tmp)
 	{
 	case A:
 		n = A;
-		//		std::cout << "A ";
 		break;
 	case C:
 		n = C;
-		//		std::cout << "C ";
 		break;
 	case G:
 		n = G;
-		//		std::cout << "G ";
 		break;
 	case T:
 		n = T;
-		//		std::cout << "T ";
 		break;
 	default:
 		break;
@@ -126,7 +119,6 @@ RNK::RNK(size_t s, Nucleotide n) :size_(s)
 		musk = musk << 2;
 		musk = musk | n;
 	}
-	//	std::cout << "musk in constructor: " << musk << std::endl;
 	for (size_t i = 0; i < physSize; i++) {
 		Nuc_[i] = 0;
 		Nuc_[i] = musk;
@@ -197,7 +189,6 @@ RNK & RNK::operator=(const RNK & rna) {
 	}
 	this->physSize = rna.physSize;
 	this->size_ = rna.size_;
-
 	return *this;
 }
 
@@ -231,13 +222,15 @@ RNK RNK::operator+(const RNK& rnk) const{
 		size_t tmp = rnk.Nuc_[i - this->physSize] << shiftLeft;
 		returnRnk.Nuc_[i - 1] = returnRnk.Nuc_[i - 1] | tmp;
 	}
+//----------------------------------------------------------------------------------------------------there are trables may be.(or not)
+	size_t tmp = rnk.Nuc_[rnk.physSize - 1] << shiftLeft;
+	returnRnk.Nuc_[returnRnk.physSize - 1] = returnRnk.Nuc_[returnRnk.physSize - 1] | tmp;
+//----------------------------------------------------------------------------------------------------
 	return returnRnk;
 }
 
-//not correct in ind==0
 void RNK::trim(size_t lastIndex) {
 	if (lastIndex < this->size_) {		//< / <= ?
-//		size_t size = 0;
 		this->size_ = lastIndex + 1;
 		this->physSize = (lastIndex + 1) / (4 * sizeof(size_t));
 		if ((lastIndex + 1) % (4 * sizeof(size_t)) != 0)
@@ -253,8 +246,6 @@ void RNK::trim(size_t lastIndex) {
 
 //need to chack index
 bool RNK::operator==(const RNK& rna) const {
-//	RNK tmpRnk(rna);
-//	bool tmp = true;
 	if (this->size_ != rna.size_) return false;
 	for (size_t i = 0; i < rna.physSize - 1; i++) {
 		if (this->Nuc_[i] != rna.Nuc_[i]) {
@@ -276,18 +267,24 @@ bool RNK::operator!=(const RNK& rnk) const {
 		return true;
 }
 
-//need to check all things in this func
-//+ so long
 RNK RNK::split(size_t ind) {
 	RNK rnkTmp;
 	RNK rnkTmpThis(*this);
-	for (size_t i = 0; i < this->size_ - ind; i++) {			//долго
+	for (size_t i = 0; i < this->size_ - ind; i++) {			//мб долго
 		rnkTmp[i] = (Nucleotide)rnkTmpThis[i + ind];
 	}
-	this->trim(ind);
+	if (ind != 0)
+		this->trim(ind - 1);
+	else 
+	{
+		delete []this->Nuc_;
+		this->size_ = 0;
+		this->physSize = 0;
+	}
 	return rnkTmp;
 }
 //without checking:
+//-----------------------------------------------------------------------
 size_t RNK::cardinality(Nucleotide value) const {
 	size_t returnNum = 0;
 	for (size_t i = 0; i < this->size_; i++) {
@@ -300,7 +297,7 @@ size_t RNK::cardinality(Nucleotide value) const {
 
 std::unordered_map < Nucleotide, int, std::hash<int> > RNK::cardinality() const {
 	std::unordered_map < Nucleotide, int, std::hash<int> > returnNums;	
-	for (int i = 0; i < this->size_; i++) {
+	for (size_t i = 0; i < this->size_; i++) {
 		switch (this->operator[](i))
 		{
 		case A:
@@ -321,6 +318,7 @@ std::unordered_map < Nucleotide, int, std::hash<int> > RNK::cardinality() const 
 	}
 	return returnNums;
 }
+//-----------------------------------------------------------------------
 
 std::ostream& operator << (std::ostream & out, const RNK& other) {
 	for (size_t i = 0; i < other.length(); i++) {
@@ -341,8 +339,45 @@ std::ostream& operator << (std::ostream & out, const RNK& other) {
 		default:
 			break;
 		}
-//		out << other[i] << " ";
 	}
 	out << "\n";
 	return out;
 }
+//for debag:
+/*----------------------------------------------------------------------------------------------for debug
+Nucleotide RNK::TmpGeterNuc(size_t i) const {
+	if (i > this->size_)
+		return A;
+	size_t Musk = this->getMusk(i, T);
+	size_t tmp = 0;
+	size_t countNucInType = (4 * sizeof(size_t));
+	size_t d = i % countNucInType;
+	size_t c = i / countNucInType;
+	tmp = Nuc_[c];
+	tmp = tmp << 2 * (countNucInType - 1 - d);
+	tmp = tmp >> 2 * (countNucInType - 1);
+	Nucleotide n = A;
+	switch (tmp)
+	{
+	case A:
+		n = A;
+		std::cout << "A ";
+		break;
+	case C:
+		n = C;
+		std::cout << "C ";
+		break;
+	case G:
+		n = G;
+		std::cout << "G ";
+		break;
+	case T:
+		n = T;
+		std::cout << "T ";
+		break;
+	default:
+		break;
+	}
+	return n;
+}
+*/
