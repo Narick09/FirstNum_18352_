@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Исходные проекты</Filter>
+    </ClCompile>
+    <ClCompile Include="RNK.cpp">
+      <Filter>Исходные проекты</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="tests">
+      <UniqueIdentifier>{35b5500f-ae63-4959-9f53-55aa399a9108}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные проекты">
+      <UniqueIdentifier>{e6c2fb15-c88b-4a19-886c-266fa5728f78}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config">
+      <Filter>tests</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="RNK.h">
+      <Filter>Исходные проекты</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

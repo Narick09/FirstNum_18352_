@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GtaTestDurations xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Executable>C:\Users\Даниил\source\repos\Sample-Test2\Debug\Sample-Test2.exe</Executable>
+  <TestDurations>
+    <TestDuration Test="TestCaseName.TestRnk" Duration="1" />
+    <TestDuration Test="TestCopy.TestCopyRNK" Duration="8" />
+    <TestDuration Test="TestInit.TestRnkConstructor" Duration="6" />
+    <TestDuration Test="TestAssigning.TestOperatorAssigningRNK" Duration="7" />
+    <TestDuration Test="TestNot.NestNotRnk" Duration="3" />
+    <TestDuration Test="TrimTest.TestTrimRNK" Duration="1" />
+    <TestDuration Test="TestTime.RunTime" Duration="2" />
+    <TestDuration Test="TestAssigning.TestAssigningThisToThis" Duration="1" />
+    <TestDuration Test="TestTime.RunTimeSmall" Duration="28" />
+    <TestDuration Test="TestTime.RunTimeBig" Duration="695" />
+    <TestDuration Test="TestOperatorSum.TestCorrect" Duration="4" />
+    <TestDuration Test="TestOperatorSum.TestBoundaryCauseSizeOf" Duration="1" />
+    <TestDuration Test="TestOperatorSum.TestBoundaryCauseSizeOfMinusOne" Duration="1" />
+    <TestDuration Test="TestNotEqual.NestNotEqualRnk" Duration="1" />
+    <TestDuration Test="TestNot.TestNotRnk" Duration="4" />
+    <TestDuration Test="TestNotEqual.TestNotEqualRnk" Duration="1" />
+    <TestDuration Test="TestIsCompl.TestIsComplRnk" Duration="1" />
+    <TestDuration Test="TestSplit.TestSplitRunTime" Duration="58749" />
+  </TestDurations>
+</GtaTestDurations>
